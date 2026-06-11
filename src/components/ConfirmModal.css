@@ -1,0 +1,19 @@
+.confirm-modal-card {
+  width: 360px;
+}
+
+.confirm-modal-message {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+.modal-btn.danger {
+  background: #ff4d4f;
+  color: white;
+}
+
+.modal-btn.danger:hover {
+  background: #ff7875;
+}

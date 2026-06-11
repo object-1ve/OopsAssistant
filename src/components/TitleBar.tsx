@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Window } from '@tauri-apps/api/window';
+import { getCurrentWindow } from '@tauri-apps/api/window';
 import './TitleBar.css';
 
-const TitleBar: React.FC = () => {
+interface TitleBarProps {
+  onShowHistory?: () => void;
+}
+
+const TitleBar: React.FC<TitleBarProps> = ({ onShowHistory }) => {
   const [isMaximized, setIsMaximized] = useState(false);
-  const appWindow = new Window('main');
+  const appWindow = getCurrentWindow();
 
   const minimize = async () => {
     await appWindow.minimize();
@@ -29,23 +33,28 @@ const TitleBar: React.FC = () => {
     checkMaximized();
 
     // Listen for resize events to update the maximize icon
-    const unlisten = appWindow.onResized(async () => {
+    const unlistenPromise = appWindow.onResized(async () => {
       const maximized = await appWindow.isMaximized();
       setIsMaximized(maximized);
     });
 
     return () => {
-      unlisten.then(u => u());
+      unlistenPromise.then(unlisten => unlisten());
     };
-  }, []);
+  }, [appWindow]);
 
   return (
     <div className="titlebar" data-tauri-drag-region>
-      <div className="titlebar-content">
-        <div className="app-title">OopsAssistant</div>
+      <div className="titlebar-content" data-tauri-drag-region>
+        <div className="app-title" data-tauri-drag-region>OopsAssistant</div>
       </div>
 
-      <div className="titlebar-controls">
+      <div className="titlebar-controls" data-tauri-drag-region>
+        <div className="titlebar-button history" onClick={onShowHistory} title="历史记录">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
         <div className="titlebar-button" onClick={minimize}>
           <svg width="12" height="12" viewBox="0 0 12 12">
             <rect fill="currentColor" width="10" height="1" x="1" y="6" />

@@ -13,6 +13,11 @@
     "core:window:allow-close",
     "core:window:allow-toggle-maximize",
     "core:window:allow-show",
-    "core:window:allow-set-focus"
+    "core:window:allow-set-focus",
+    "sql:default",
+    "sql:allow-load",
+    "sql:allow-execute",
+    "sql:allow-select",
+    "dialog:allow-ask"
   ]
 }

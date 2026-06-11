@@ -1,0 +1,173 @@
+.command-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: background 0.12s, border-color 0.12s;
+  gap: 8px;
+}
+
+.command-item:hover {
+  background: var(--result-hover);
+}
+
+.command-item.selected {
+  background: var(--result-selected);
+  border-left-color: var(--accent);
+}
+
+.command-item.copied {
+  background: rgba(16, 185, 129, 0.1);
+  border-left-color: var(--copied-bg);
+}
+
+.command-item-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+}
+
+.command-item-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.command-item-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.command-item-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-h);
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.match-reason-badge {
+  font-size: 10px;
+  color: var(--accent);
+  background: var(--accent-bg);
+  padding: 1px 6px;
+  border-radius: 4px;
+  opacity: 0.8;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.command-item-cmd {
+  font-size: 12px;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.command-item-sub {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.copy-count-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  color: var(--text);
+  opacity: 0.5;
+  background: var(--result-hover);
+  padding: 1px 5px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  font-weight: 500;
+}
+
+.command-item.selected .copy-count-badge {
+  opacity: 0.7;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.command-item-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.pin-btn {
+  background: none;
+  border: none;
+  font-size: 0;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px;
+  color: var(--text);
+  opacity: 0.4;
+  transition: opacity 0.15s, color 0.15s, transform 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pin-btn:hover {
+  transform: scale(1.1);
+  opacity: 1;
+  background: var(--accent-bg);
+  color: var(--accent);
+  border-radius: 4px;
+}
+
+.pin-btn.active {
+  color: var(--accent);
+  opacity: 1;
+}
+
+.copy-btn-mini,
+.detail-btn-mini,
+.delete-btn-mini {
+  background: none;
+  border: none;
+  color: var(--text);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  opacity: 0.4;
+  transition: opacity 0.15s, background 0.15s;
+}
+
+.command-item:hover .copy-btn-mini,
+.command-item.selected .copy-btn-mini,
+.command-item:hover .detail-btn-mini,
+.command-item.selected .detail-btn-mini,
+.command-item:hover .delete-btn-mini,
+.command-item.selected .delete-btn-mini {
+  opacity: 0.8;
+}
+
+.copy-btn-mini:hover,
+.detail-btn-mini:hover,
+.delete-btn-mini:hover {
+  opacity: 1 !important;
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+.delete-btn-mini:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}

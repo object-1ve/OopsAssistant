@@ -1,0 +1,29 @@
+.search-results {
+  display: flex;
+  flex-direction: column;
+}
+
+.search-results-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 16px;
+  color: var(--text);
+  text-align: center;
+}
+
+.empty-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.search-results-empty p {
+  margin: 2px 0;
+  font-size: 14px;
+}
+
+.empty-hint {
+  font-size: 12px !important;
+  opacity: 0.6;
+}

@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "OopsAssistant",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "identifier": "com.oopsassistant.app",
   "build": {
     "frontendDist": "../dist",
@@ -12,6 +12,7 @@
   "app": {
     "windows": [
       {
+        "label": "main",
         "title": "OopsAssistant",
         "width": 800,
         "height": 600,
