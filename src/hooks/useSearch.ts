@@ -90,8 +90,8 @@ export function useSearch(commands: Command[], pinnedIds: Set<string>, sortBy: S
         if (sortBy === 'copyCount') {
           if (a.copyCount !== b.copyCount) return b.copyCount - a.copyCount;
         } else {
-          const aTime = new Date(a.createdAt).getTime();
-          const bTime = new Date(b.createdAt).getTime();
+          const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
           if (aTime !== bTime) return bTime - aTime;
         }
         
@@ -118,7 +118,9 @@ export function useSearch(commands: Command[], pinnedIds: Set<string>, sortBy: S
         if (sortBy === 'copyCount') {
           return b.cmd.copyCount - a.cmd.copyCount;
         } else {
-          return new Date(b.cmd.createdAt).getTime() - new Date(a.cmd.createdAt).getTime();
+          const aTime = a.cmd.createdAt ? new Date(a.cmd.createdAt).getTime() : 0;
+          const bTime = b.cmd.createdAt ? new Date(b.cmd.createdAt).getTime() : 0;
+          return bTime - aTime;
         }
       })
       .map((item) => item.cmd);

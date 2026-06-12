@@ -69,14 +69,24 @@ const CommandDetail: React.FC<Props> = ({ command, category, onCopy, onClose, on
         </div>
       </div>
 
-      <div className="detail-command-box">
-        <code className="detail-command-text">{getResolvedCommand()}</code>
-        <button
-          className={`detail-copy-btn ${copied ? 'copied' : ''}`}
-          onClick={() => onCopy({ ...command, command: getResolvedCommand() })}
-        >
-          {copied ? '✓ 已复制' : '复制'}
-        </button>
+      <div className="detail-section">
+        <span className="section-label">原指令</span>
+        <div className="original-command-box">
+          <code className="original-text">{command.command}</code>
+        </div>
+      </div>
+
+      <div className="detail-section">
+        <span className="section-label">解析后</span>
+        <div className="detail-command-box">
+          <code className="detail-command-text">{getResolvedCommand()}</code>
+          <button
+            className={`detail-copy-btn ${copied ? 'copied' : ''}`}
+            onClick={() => onCopy({ ...command, command: getResolvedCommand() })}
+          >
+            {copied ? '✓ 已复制' : '复制'}
+          </button>
+        </div>
       </div>
 
       <p className="detail-desc">{command.description}</p>

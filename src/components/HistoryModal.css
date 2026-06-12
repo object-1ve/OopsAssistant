@@ -107,6 +107,15 @@
 .history-item-info {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.history-item-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.375rem;
 }
 
 .history-item-header {
@@ -132,6 +141,7 @@
 }
 
 .history-item-text {
+  flex: 1;
   font-size: 0.75rem;
   color: var(--primary);
   font-family: var(--mono);
@@ -142,15 +152,14 @@
   word-break: break-all;
   max-height: 3.75rem;
   overflow-y: auto;
-  margin-bottom: 0.375rem;
   min-width: 0;
   border: none;
   line-height: 1.4;
 }
 
 .history-copy-btn {
-  width: 2rem;
-  height: 2rem;
+  width: 1.75rem;
+  height: 1.75rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -161,6 +170,7 @@
   cursor: pointer;
   transition: all 0.12s;
   flex-shrink: 0;
+  margin-top: 2px;
 }
 
 .history-copy-btn svg {

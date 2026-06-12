@@ -48,22 +48,24 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ history, onClose, onClear, 
             history.map((item) => (
               <div key={item.id} className="history-item">
                 <div className="history-item-info">
-                  <div className="history-item-text">{item.commandText}</div>
+                  <div className="history-item-main">
+                    <div className="history-item-text">{item.commandText}</div>
+                    <button 
+                      className="history-copy-btn" 
+                      onClick={() => onCopy(item.commandText)}
+                      title="再次复制"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                        <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+                      </svg>
+                    </button>
+                  </div>
                   <div className="history-item-header">
                     <span className="history-item-name">{item.commandName}</span>
                     <span className="history-item-time">{formatDate(item.timestamp)}</span>
                   </div>
                 </div>
-                <button 
-                  className="history-copy-btn" 
-                  onClick={() => onCopy(item.commandText)}
-                  title="再次复制"
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
-                  </svg>
-                </button>
               </div>
             ))
           )}

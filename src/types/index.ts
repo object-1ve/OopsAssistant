@@ -19,8 +19,8 @@ export interface Command {
   tags: string[];
   params: ParamHint[];
   copyCount: number;
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
   isCustom?: boolean;
 }
 
