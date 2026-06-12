@@ -14,14 +14,17 @@ import { usePinnedCommands } from './hooks/usePinnedCommands';
 import { useCommands } from './hooks/useCommands';
 import { useHistory } from './hooks/useHistory';
 import type { Command } from './types/index';
+import type { SortBy } from './hooks/useSearch';
 
 function App() {
   const { commands, categories, addCommand, updateCommand, deleteCommand, incrementCopyCount, loading } = useCommands();
   const { pinnedIds, togglePin } = usePinnedCommands();
   const { history, addHistory, clearHistory } = useHistory();
 
+  const [sortBy, setSortBy] = useState<SortBy>('copyCount');
+
   const { query, results, selectedIndex, setSelectedIndex, updateQuery, handleKeyDown } =
-    useSearch(commands, pinnedIds);
+    useSearch(commands, pinnedIds, sortBy);
 
   const [selectedCommand, setSelectedCommand] = useState<Command | null>(null);
   const [editingCommand, setEditingCommand] = useState<Command | null>(null);
@@ -75,22 +78,31 @@ function App() {
   }, [incrementCopyCount, addHistory, showToast]);
 
   const handleAddCustom = useCallback(
-    (cmd: Omit<Command, 'id' | 'isCustom'>) => {
-      addCommand(cmd);
-      setShowModal(false);
+    async (cmd: Omit<Command, 'id' | 'isCustom'>) => {
+      const success = await addCommand(cmd);
+      if (success) {
+        setShowModal(false);
+        showToast('指令已添加');
+      } else {
+        showToast('添加失败，请重试');
+      }
     },
-    [addCommand]
+    [addCommand, showToast]
   );
 
   const handleUpdateCustom = useCallback(
-    (id: string, cmd: Partial<Omit<Command, 'id' | 'isCustom'>>) => {
-      updateCommand(id, cmd);
-      setEditingCommand(null);
-      // 如果当前选中的正是被编辑的指令，需要更新选中状态
-      if (selectedCommand?.id === id) {
-        setSelectedCommand(prev => prev ? { ...prev, ...cmd } : null);
+    async (id: string, cmd: Partial<Omit<Command, 'id' | 'isCustom'>>) => {
+      const success = await updateCommand(id, cmd);
+      if (success) {
+        setEditingCommand(null);
+        // 如果当前选中的正是被编辑的指令，需要更新选中状态
+        if (selectedCommand?.id === id) {
+          setSelectedCommand(prev => prev ? { ...prev, ...cmd } : null);
+        }
+        showToast('指令已更新');
+      } else {
+        showToast('更新失败，请重试');
       }
-      showToast('指令已更新');
     },
     [updateCommand, selectedCommand, showToast]
   );
@@ -153,7 +165,11 @@ function App() {
 
   return (
     <div className="app-container">
-      <TitleBar onShowHistory={() => setShowHistory(true)} />
+      <TitleBar 
+        onShowHistory={() => setShowHistory(true)} 
+        sortBy={sortBy}
+        onSortChange={setSortBy}
+      />
       
       {loading ? (
         <div className="loading">加载中...</div>
@@ -179,6 +195,7 @@ function App() {
                 onTogglePin={togglePin}
                 onCopy={handleCopy}
                 onDelete={handleDelete}
+                sortBy={sortBy}
               />
             </div>
 
@@ -220,6 +237,7 @@ function App() {
             setShowModal(false);
             setEditingCommand(null);
           }}
+          showToast={showToast}
         />
       )}
 

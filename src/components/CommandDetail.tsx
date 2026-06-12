@@ -21,6 +21,21 @@ const CommandDetail: React.FC<Props> = ({ command, category, onCopy, onClose, on
     return resolveCommand(command.command, filledParams);
   };
 
+  const formatDate = (dateStr: string) => {
+    try {
+      const date = new Date(dateStr.endsWith('Z') ? dateStr : dateStr + 'Z');
+      return date.toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch (e) {
+      return dateStr;
+    }
+  };
+
   return (
     <div className="command-detail">
       <div className="detail-header">
@@ -30,6 +45,11 @@ const CommandDetail: React.FC<Props> = ({ command, category, onCopy, onClose, on
           {command.copyCount > 0 && (
             <span className="detail-copy-count" title={`累计复制 ${command.copyCount} 次`}>
               已复制 {command.copyCount} 次
+            </span>
+          )}
+          {command.createdAt && (
+            <span className="detail-created-at" title="创建时间">
+                {formatDate(command.createdAt)}
             </span>
           )}
         </div>

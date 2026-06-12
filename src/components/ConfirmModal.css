@@ -1,19 +1,21 @@
 .confirm-modal-card {
-  width: 360px;
+  width: 22rem;
 }
 
 .confirm-modal-message {
-  font-size: 14px;
-  color: var(--text);
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
   line-height: 1.5;
-  margin-bottom: 8px;
+  margin-bottom: 0.5rem;
 }
 
 .modal-btn.danger {
-  background: #ff4d4f;
-  color: white;
+  background: var(--destructive);
+  color: var(--destructive-foreground);
+  border-color: var(--destructive);
 }
 
 .modal-btn.danger:hover {
-  background: #ff7875;
+  background: #dc2626;
+  border-color: #dc2626;
 }

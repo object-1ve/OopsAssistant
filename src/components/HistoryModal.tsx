@@ -11,7 +11,7 @@ interface HistoryModalProps {
 
 const HistoryModal: React.FC<HistoryModalProps> = ({ history, onClose, onClear, onCopy }) => {
   const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
+    const date = new Date(dateStr.endsWith('Z') ? dateStr : dateStr + 'Z');
     return date.toLocaleString('zh-CN', {
       month: '2-digit',
       day: '2-digit',

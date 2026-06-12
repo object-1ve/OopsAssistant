@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Command, Category } from '../types';
 import { extractParams } from '../utils/placeholder';
 import './AddCommandModal.css';
@@ -6,48 +6,79 @@ import './AddCommandModal.css';
 interface Props {
   categories: Category[];
   initialData?: Command;
-  onAdd: (cmd: Omit<Command, 'id' | 'isCustom'>) => void;
-  onUpdate?: (id: string, cmd: Partial<Omit<Command, 'id' | 'isCustom'>>) => void;
+  onAdd: (cmd: Omit<Command, 'id' | 'isCustom'>) => Promise<void> | void;
+  onUpdate?: (id: string, cmd: Partial<Omit<Command, 'id' | 'isCustom'>>) => Promise<void> | void;
   onClose: () => void;
+  showToast: (msg: string) => void;
 }
 
-const AddCommandModal: React.FC<Props> = ({ categories, initialData, onAdd, onUpdate, onClose }) => {
+const AddCommandModal: React.FC<Props> = ({ categories, initialData, onAdd, onUpdate, onClose, showToast }) => {
   const [name, setName] = useState(initialData?.name ?? '');
   const [command, setCommand] = useState(initialData?.command ?? '');
   const [description, setDescription] = useState(initialData?.description ?? '');
   const [categoryId, setCategoryId] = useState(initialData?.categoryId ?? categories[0]?.id ?? '');
-  const [tags, setTags] = useState(initialData?.tags.join(', ') ?? '');
+  const [tags, setTags] = useState(initialData?.tags?.join(', ') ?? '');
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim() || !command.trim()) return;
-
-    // 自动提取参数
-    const extracted = extractParams(command);
-    const params = extracted.map(p => ({
-      name: p.name,
-      example: initialData?.params.find(ip => ip.name === p.name)?.example ?? '' 
-    }));
-
-    const cmdData = {
-      name: name.trim(),
-      command: command.trim(),
-      description: description.trim() || name.trim(),
-      categoryId,
-      tags: tags
-        .split(/[,，\s]+/)
-        .map((t) => t.trim())
-        .filter(Boolean),
-      params,
-      copyCount: initialData?.copyCount ?? 0,
-    };
-
-    if (initialData && onUpdate) {
-      onUpdate(initialData.id, cmdData);
-    } else {
-      onAdd(cmdData);
+  // 确保在 categories 加载后有默认值
+  useEffect(() => {
+    if (!categoryId && categories.length > 0) {
+      setCategoryId(categories[0].id);
     }
-    onClose();
+  }, [categories, categoryId]);
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isSubmitting) return;
+
+    if (!command.trim()) {
+      showToast('请输入命令内容');
+      return;
+    }
+
+    if (!name.trim()) {
+      showToast('请输入指令名称');
+      return;
+    }
+
+    if (!categoryId) {
+      showToast('请选择分类');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      // 自动提取参数
+      const extracted = extractParams(command);
+      const params = extracted.map(p => ({
+        name: p.name,
+        example: initialData?.params?.find(ip => ip.name === p.name)?.example ?? '' 
+      }));
+
+      const cmdData = {
+        name: name.trim(),
+        command: command.trim(),
+        description: description.trim() || name.trim(),
+        categoryId,
+        tags: tags
+          .split(/[,，\s]+/)
+          .map((t) => t.trim())
+          .filter(Boolean),
+        params,
+        copyCount: initialData?.copyCount ?? 0,
+      };
+
+      if (initialData && onUpdate) {
+        await onUpdate(initialData.id, cmdData);
+      } else {
+        await onAdd(cmdData);
+      }
+    } catch (err) {
+      console.error('Submit failed:', err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -131,9 +162,9 @@ const AddCommandModal: React.FC<Props> = ({ categories, initialData, onAdd, onUp
             <button
               type="submit"
               className="modal-btn primary"
-              disabled={!name.trim() || !command.trim()}
+              disabled={isSubmitting}
             >
-              {initialData ? '保存' : '添加'}
+              {isSubmitting ? '处理中...' : (initialData ? '保存' : '添加')}
             </button>
           </div>
         </form>

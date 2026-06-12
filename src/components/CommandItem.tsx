@@ -1,5 +1,5 @@
 import type { Category, Command } from '../types';
-import type { SearchResult } from '../hooks/useSearch';
+import type { SearchResult, SortBy } from '../hooks/useSearch';
 import CategoryBadge from './CategoryBadge';
 import './CommandItem.css';
 
@@ -15,6 +15,7 @@ interface Props {
   onTogglePin: (id: string) => void;
   onCopy: (command: Command) => void;
   onDelete?: (id: string) => void;
+  sortBy: SortBy;
 }
 
 const CommandItem: React.FC<Props> = ({
@@ -29,7 +30,23 @@ const CommandItem: React.FC<Props> = ({
   onTogglePin,
   onCopy,
   onDelete,
+  sortBy,
 }) => {
+  const formatDate = (dateStr: string) => {
+    try {
+      // SQLite CURRENT_TIMESTAMP 输出 UTC 不含时区标记，显式加 Z 避免歧义
+      const date = new Date(dateStr.endsWith('Z') ? dateStr : dateStr + 'Z');
+      const now = new Date();
+      const diffDays = Math.floor((now.getTime() - date.getTime()) / 86400000);
+      if (diffDays === 0) return '今天';
+      if (diffDays === 1) return '昨天';
+      if (diffDays < 7) return `${diffDays}天前`;
+      return date.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' });
+    } catch {
+      return '';
+    }
+  };
+
   return (
     <div
       className={`command-item ${isSelected ? 'selected' : ''} ${isCopied ? 'copied' : ''}`}
@@ -41,6 +58,20 @@ const CommandItem: React.FC<Props> = ({
     >
       <div className="command-item-left">
         <div className="command-item-text">
+          <div className="command-item-header">
+            <span className="command-item-name">
+              {command.name}
+            </span>
+            <CategoryBadge category={category ?? { id: '', name: '?', color: '#999', icon: '?' }} />
+            {command.matchReason && (
+              <span className="match-reason-badge">
+                {command.matchReason}
+              </span>
+            )}
+            {sortBy === 'createdAt' && command.createdAt && (
+              <span className="command-item-date">{formatDate(command.createdAt)}</span>
+            )}
+          </div>
           <div className="command-item-sub">
             <code className="command-item-cmd">{command.command}</code>
             {command.copyCount > 0 && (
@@ -50,17 +81,6 @@ const CommandItem: React.FC<Props> = ({
                   <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
                 </svg>
                 {command.copyCount}
-              </span>
-            )}
-          </div>
-          <div className="command-item-header">
-            <span className="command-item-name">
-              {command.name}
-            </span>
-            <CategoryBadge category={category ?? { id: '', name: '?', color: '#999', icon: '?' }} />
-            {command.matchReason && (
-              <span className="match-reason-badge">
-                {command.matchReason}
               </span>
             )}
           </div>

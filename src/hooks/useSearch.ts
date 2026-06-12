@@ -69,7 +69,9 @@ function scoreCommand(cmd: Command, query: string): { score: number; reason?: st
   return { score: maxScore, reason };
 }
 
-export function useSearch(commands: Command[], pinnedIds: Set<string>) {
+export type SortBy = 'copyCount' | 'createdAt';
+
+export function useSearch(commands: Command[], pinnedIds: Set<string>, sortBy: SortBy = 'copyCount') {
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -77,23 +79,29 @@ export function useSearch(commands: Command[], pinnedIds: Set<string>) {
     let filtered = commands;
 
     if (!query.trim()) {
-      // 空查询：置顶 → 按复制次数降序 → 按分类排序
+      // 空查询：置顶 → 按排序规则降序 → 最后按分类排序
       const sorted = [...filtered].sort((a, b) => {
         // 首先按置顶
         const aPinned = pinnedIds.has(a.id) ? 0 : 1;
         const bPinned = pinnedIds.has(b.id) ? 0 : 1;
         if (aPinned !== bPinned) return aPinned - bPinned;
 
-        // 再按复制次数降序
-        if (a.copyCount !== b.copyCount) return b.copyCount - a.copyCount;
+        // 根据排序规则排序
+        if (sortBy === 'copyCount') {
+          if (a.copyCount !== b.copyCount) return b.copyCount - a.copyCount;
+        } else {
+          const aTime = new Date(a.createdAt).getTime();
+          const bTime = new Date(b.createdAt).getTime();
+          if (aTime !== bTime) return bTime - aTime;
+        }
         
         // 最后按分类排序
-        return a.categoryId.localeCompare(b.categoryId);
+        return (a.categoryId || '').localeCompare(b.categoryId || '');
       });
       return sorted as SearchResult[];
     }
 
-    // 有查询：按匹配分数排序，相同分数下置顶优先
+    // 有查询：按匹配分数排序，相同分数下应用排序规则和置顶
     const scored = filtered
       .map((cmd) => {
         const { score, reason } = scoreCommand(cmd, query);
@@ -102,13 +110,20 @@ export function useSearch(commands: Command[], pinnedIds: Set<string>) {
       .filter((item) => item.score > 0)
       .sort((a, b) => {
         if (b.score !== a.score) return b.score - a.score;
+        
         const aPinned = pinnedIds.has(a.cmd.id) ? 0 : 1;
         const bPinned = pinnedIds.has(b.cmd.id) ? 0 : 1;
-        return aPinned - bPinned;
+        if (aPinned !== bPinned) return aPinned - bPinned;
+
+        if (sortBy === 'copyCount') {
+          return b.cmd.copyCount - a.cmd.copyCount;
+        } else {
+          return new Date(b.cmd.createdAt).getTime() - new Date(a.cmd.createdAt).getTime();
+        }
       })
       .map((item) => item.cmd);
     return scored;
-  }, [commands, query, pinnedIds]);
+  }, [commands, query, pinnedIds, sortBy]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {

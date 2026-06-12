@@ -32,7 +32,8 @@ async function initDb(database: Database) {
       tags TEXT,
       params TEXT,
       is_builtin INTEGER DEFAULT 0,
-      copy_count INTEGER DEFAULT 0
+      copy_count INTEGER DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
 
@@ -41,6 +42,48 @@ async function initDb(database: Database) {
     await database.execute('ALTER TABLE commands ADD COLUMN copy_count INTEGER DEFAULT 0');
   } catch {
     // Column already exists, ignore
+  }
+
+  // Migration: add created_at column if it doesn't exist
+  try {
+    await database.execute('ALTER TABLE commands ADD COLUMN created_at DATETIME');
+  } catch {
+    // Column already exists, ignore
+  }
+
+  // Backfill created_at for existing rows that are NULL
+  try {
+    await database.execute("UPDATE commands SET created_at = datetime('now') WHERE created_at IS NULL");
+  } catch {
+    // Column doesn't exist yet, ignore
+  }
+
+  // Migration: add updated_at column if it doesn't exist
+  try {
+    await database.execute('ALTER TABLE commands ADD COLUMN updated_at DATETIME');
+  } catch {
+    // Column already exists, ignore
+  }
+
+  // Backfill updated_at for existing rows that are NULL
+  try {
+    await database.execute("UPDATE commands SET updated_at = created_at WHERE updated_at IS NULL");
+  } catch {
+    // Column doesn't exist yet, ignore
+  }
+
+  // Create trigger to auto-update updated_at on row update (if not exists)
+  try {
+    await database.execute(`
+      CREATE TRIGGER IF NOT EXISTS trg_commands_updated_at
+      AFTER UPDATE ON commands
+      FOR EACH ROW
+      BEGIN
+        UPDATE commands SET updated_at = CURRENT_TIMESTAMP WHERE id = OLD.id;
+      END
+    `);
+  } catch {
+    // Trigger already exists, ignore
   }
 
   // Create pinned_commands table
@@ -91,7 +134,7 @@ async function seedData(database: Database) {
   if (commandCount[0].count === 0) {
     for (const cmd of builtInCommands) {
       await database.execute(
-        'INSERT INTO commands (id, name, command, description, categoryId, tags, params, is_builtin, copy_count) VALUES ($1, $2, $3, $4, $5, $6, $7, 1, 0)',
+        'INSERT INTO commands (id, name, command, description, categoryId, tags, params, is_builtin, copy_count, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, 1, 0, $8, $8)',
         [
           cmd.id,
           cmd.name,
@@ -99,7 +142,8 @@ async function seedData(database: Database) {
           cmd.description,
           cmd.categoryId,
           JSON.stringify(cmd.tags),
-          JSON.stringify(cmd.params)
+          JSON.stringify(cmd.params),
+          cmd.createdAt || new Date().toISOString()
         ]
       );
     }

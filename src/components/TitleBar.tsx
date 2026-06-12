@@ -1,14 +1,34 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { getCurrentWindow } from '@tauri-apps/api/window';
+import type { SortBy } from '../hooks/useSearch';
 import './TitleBar.css';
 
 interface TitleBarProps {
   onShowHistory?: () => void;
+  sortBy?: SortBy;
+  onSortChange?: (sortBy: SortBy) => void;
 }
 
-const TitleBar: React.FC<TitleBarProps> = ({ onShowHistory }) => {
+const TitleBar: React.FC<TitleBarProps> = ({ onShowHistory, sortBy, onSortChange }) => {
   const [isMaximized, setIsMaximized] = useState(false);
+  const [showSortMenu, setShowSortMenu] = useState(false);
+  const sortMenuRef = useRef<HTMLDivElement>(null);
   const appWindow = getCurrentWindow();
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (sortMenuRef.current && !sortMenuRef.current.contains(event.target as Node)) {
+        setShowSortMenu(false);
+      }
+    };
+
+    if (showSortMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showSortMenu]);
 
   const minimize = async () => {
     await appWindow.minimize();
@@ -50,6 +70,39 @@ const TitleBar: React.FC<TitleBarProps> = ({ onShowHistory }) => {
       </div>
 
       <div className="titlebar-controls" data-tauri-drag-region>
+        <div className="sort-container" ref={sortMenuRef}>
+          <div 
+            className={`titlebar-button sort ${showSortMenu ? 'active' : ''}`} 
+            onClick={() => setShowSortMenu(!showSortMenu)}
+            title="排序设置"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M11 5h10M11 9h10M11 13h10M11 17h10M3 7l3-3 3 3M6 4v16" />
+            </svg>
+          </div>
+          {showSortMenu && (
+            <div className="sort-menu">
+              <div 
+                className={`sort-item ${sortBy === 'copyCount' ? 'active' : ''}`}
+                onClick={() => {
+                  onSortChange?.('copyCount');
+                  setShowSortMenu(false);
+                }}
+              >
+                <span>按复制次数排序</span>
+              </div>
+              <div 
+                className={`sort-item ${sortBy === 'createdAt' ? 'active' : ''}`}
+                onClick={() => {
+                  onSortChange?.('createdAt');
+                  setShowSortMenu(false);
+                }}
+              >
+                <span>按创建时间排序</span>
+              </div>
+            </div>
+          )}
+        </div>
         <div className="titlebar-button history" onClick={onShowHistory} title="历史记录">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />

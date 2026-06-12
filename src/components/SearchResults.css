@@ -1,6 +1,7 @@
 .search-results {
   display: flex;
   flex-direction: column;
+  padding: 0.25rem 0;
 }
 
 .search-results-empty {
@@ -8,22 +9,23 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 48px 16px;
-  color: var(--text);
+  padding: 3rem 1rem;
+  color: var(--muted-foreground);
   text-align: center;
+  gap: 0.25rem;
 }
 
 .empty-icon {
-  font-size: 32px;
-  margin-bottom: 8px;
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  opacity: 0.5;
 }
 
 .search-results-empty p {
-  margin: 2px 0;
-  font-size: 14px;
+  font-size: 0.8125rem;
 }
 
 .empty-hint {
-  font-size: 12px !important;
+  font-size: 0.75rem !important;
   opacity: 0.6;
 }

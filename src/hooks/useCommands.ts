@@ -19,10 +19,13 @@ export function useCommands() {
       const cmdResult = await db.select<any[]>('SELECT * FROM commands');
       const mapped = cmdResult.map(row => ({
         ...row,
+        categoryId: row.categoryId ?? row.categoryid ?? '',
         tags: row.tags ? JSON.parse(row.tags) : [],
         params: row.params ? JSON.parse(row.params) : [],
-        copyCount: row.copy_count ?? 0,
-        isCustom: row.is_builtin === 0
+        copyCount: row.copy_count ?? row.copyCount ?? 0,
+        createdAt: row.created_at ?? row.createdAt ?? new Date().toISOString(),
+        updatedAt: row.updated_at ?? row.updatedAt ?? row.created_at ?? new Date().toISOString(),
+        isCustom: (row.is_builtin ?? row.isbuiltin ?? 0) === 0
       }));
       setCommands(mapped);
     } catch (err) {
@@ -42,7 +45,7 @@ export function useCommands() {
         const db = await getDb();
         const id = `custom-${Date.now()}`;
         await db.execute(
-          'INSERT INTO commands (id, name, command, description, categoryId, tags, params, is_builtin, copy_count) VALUES ($1, $2, $3, $4, $5, $6, $7, 0, 0)',
+          'INSERT INTO commands (id, name, command, description, categoryId, tags, params, is_builtin, copy_count, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, 0, 0, $8, $8)',
           [
             id,
             cmd.name,
@@ -50,12 +53,15 @@ export function useCommands() {
             cmd.description,
             cmd.categoryId,
             JSON.stringify(cmd.tags || []),
-            JSON.stringify(cmd.params || [])
+            JSON.stringify(cmd.params || []),
+            new Date().toISOString()
           ]
         );
         await fetchData();
+        return true;
       } catch (err) {
         console.error('Failed to add command:', err);
+        return false;
       }
     },
     [fetchData]
@@ -94,7 +100,7 @@ export function useCommands() {
           values.push(JSON.stringify(cmd.params));
         }
 
-        if (updates.length === 0) return;
+        if (updates.length === 0) return true;
 
         values.push(id);
         await db.execute(
@@ -102,8 +108,10 @@ export function useCommands() {
           values
         );
         await fetchData();
+        return true;
       } catch (err) {
         console.error('Failed to update command:', err);
+        return false;
       }
     },
     [fetchData]

@@ -1,5 +1,5 @@
 import type { Category, Command } from '../types';
-import type { SearchResult } from '../hooks/useSearch';
+import type { SearchResult, SortBy } from '../hooks/useSearch';
 import CommandItem from './CommandItem';
 import './SearchResults.css';
 
@@ -14,6 +14,7 @@ interface Props {
   onTogglePin: (id: string) => void;
   onCopy: (command: Command) => void;
   onDelete?: (id: string) => void;
+  sortBy: SortBy;
 }
 
 const SearchResults: React.FC<Props> = ({
@@ -27,6 +28,7 @@ const SearchResults: React.FC<Props> = ({
   onTogglePin,
   onCopy,
   onDelete,
+  sortBy,
 }) => {
   const categoryMap = new Map(categories.map((c) => [c.id, c]));
 
@@ -56,6 +58,7 @@ const SearchResults: React.FC<Props> = ({
           onTogglePin={onTogglePin}
           onCopy={onCopy}
           onDelete={onDelete}
+          sortBy={sortBy}
         />
       ))}
     </div>
